@@ -39,9 +39,15 @@ let step = 1;
 const total = 6;
 const $ = (s) => document.querySelector(s);
 
-function syncReaction(key, value) {
+function syncReaction(key, value, animate = false) {
   const el = document.querySelector(`[data-reaction="${key}"]`);
-  if (el && reactions[key]?.[value] != null) el.textContent = reactions[key][value];
+  if (!el || reactions[key]?.[value] == null) return;
+  el.textContent = reactions[key][value];
+  if (animate) {
+    el.classList.remove('reaction-pop');
+    void el.offsetWidth;
+    el.classList.add('reaction-pop');
+  }
 }
 
 document.querySelectorAll('[data-bind]').forEach(group => {
@@ -51,18 +57,25 @@ document.querySelectorAll('[data-bind]').forEach(group => {
     if (value === state[key]) btn.classList.add('selected');
     btn.onclick = () => {
       state[key] = value;
-      group.querySelectorAll('button').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      syncReaction(key, value);
+      group.querySelectorAll('button').forEach(b => b.classList.remove('selected', 'picked'));
+      btn.classList.add('selected', 'picked');
+      setTimeout(() => btn.classList.remove('picked'), 280);
+      syncReaction(key, value, true);
     };
   });
   syncReaction(key, state[key]);
 });
 
-function updateStep() {
+function updateStep(direction = 'forward') {
   document.querySelectorAll('.question').forEach(q => {
-    q.classList.toggle('active', Number(q.dataset.step) === step);
-    if (Number(q.dataset.step) === step) q.scrollTop = 0;
+    const active = Number(q.dataset.step) === step;
+    q.classList.remove('enter-forward', 'enter-back');
+    q.classList.toggle('active', active);
+    if (active) {
+      q.scrollTop = 0;
+      void q.offsetWidth;
+      q.classList.add(direction === 'back' ? 'enter-back' : 'enter-forward');
+    }
   });
   $('#stepLabel').textContent = `${step} / ${total}`;
   $('#progressBar').style.width = `${(step / total) * 100}%`;
@@ -70,10 +83,18 @@ function updateStep() {
   $('#nextBtn').textContent = step === total ? '帮我决定' : '继续';
 }
 
-$('#backBtn').onclick = () => { if (step > 1) { step--; updateStep(); } };
+$('#backBtn').onclick = () => {
+  if (step > 1) {
+    step--;
+    updateStep('back');
+  }
+};
 
 $('#nextBtn').onclick = async () => {
-  if (step < total) { step++; return updateStep(); }
+  if (step < total) {
+    step++;
+    return updateStep('forward');
+  }
   $('#nextBtn').disabled = true;
   $('#nextBtn').textContent = '正在替你冷静一下…';
   try {
@@ -116,10 +137,10 @@ $('#againBtn').onclick = () => {
   $('#resultView').classList.add('hidden');
   $('#questionView').classList.remove('hidden');
   step = 1;
-  updateStep();
+  updateStep('forward');
 };
 
-updateStep();
+updateStep('forward');
 
 if (new URLSearchParams(location.search).get('preview') === 'result') {
   setTimeout(() => showResult({
