@@ -3,132 +3,180 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#f8f1e6" />
-  <title>先别买 · Buy or Wait</title>
+  <meta name="theme-color" content="#f7f3eb" />
+  <title>先别买</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <main class="app-shell">
-    <section class="phone-card" id="questionView">
+    <section class="app-card" id="appCard">
       <header class="topbar">
-        <span class="brand">先别买</span>
-        <span class="step" id="stepLabel">把手机给我</span>
+        <div class="brand"><span class="wallet-mark">▰</span><span>先别买</span></div>
+        <span class="top-meta" id="topMeta">付款前，先问自己</span>
       </header>
 
-      <section class="start-screen" id="startScreen">
-        <p class="scribble">付款前，先清醒两分钟。</p>
-        <h1>先别买。</h1>
-        <p class="start-copy">把手机给我。<br />我替你问几句不太好听的。</p>
-        <button class="start-btn" id="startBtn" type="button">开始审你 →</button>
-        <p class="tiny-note">放心，不骂你太狠。</p>
+      <section class="screen home-screen active" id="homeScreen">
+        <div class="home-copy">
+          <p class="eyebrow">BUY OR WAIT</p>
+          <h1>今天想买什么？</h1>
+          <p class="lead">我不会阻止你。<br>只是帮你确认，它是不是真的值得。</p>
+        </div>
+
+        <div class="product-entry">
+          <label for="productInput">想买的东西</label>
+          <div class="input-wrap">
+            <input id="productInput" maxlength="40" placeholder="比如 AirPods Max" autocomplete="off" />
+            <button id="clearInput" type="button" aria-label="清空">×</button>
+          </div>
+          <div class="examples">
+            <span>试试这些</span>
+            <div class="chips">
+              <button type="button" data-example="跑鞋">跑鞋</button>
+              <button type="button" data-example="相机">相机</button>
+              <button type="button" data-example="咖啡机">咖啡机</button>
+              <button type="button" data-example="耳机">耳机</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="wallet-note">
+          <div class="wallet-face">👛</div>
+          <div><strong>钱包：</strong><p>买之前，先给我一分钟发言权。</p></div>
+        </div>
+
+        <button class="primary" id="startBtn" type="button">开始看看 <span>→</span></button>
       </section>
 
-      <form id="decisionForm" class="hidden">
-        <section class="question active q-scatter" data-step="1">
-          <p class="question-kicker">第一反应最诚实。</p>
-          <label>你现在到底有多上头？</label>
-          <div class="choice-list scatter" data-bind="desire">
-            <button type="button" data-value="1"><span>谁爱买谁买</span></button>
-            <button type="button" data-value="2"><span>可以看看</span></button>
-            <button type="button" data-value="3"><span>已经有点上头</span></button>
-            <button type="button" data-value="4"><span>今晚就想下单</span></button>
-            <button type="button" data-value="5"><span>不买睡不着</span></button>
-          </div>
-          <p class="reaction" data-reaction="desire"></p>
-        </section>
-
-        <section class="question q-list" data-step="2">
-          <p class="question-kicker">功能差不多的，也算。</p>
-          <label>家里有替身吗？</label>
-          <div class="choice-list ruled" data-bind="similarOwned">
-            <button type="button" data-value="0"><span>没有，真缺</span></button>
-            <button type="button" data-value="1"><span>好像有一个类似的</span></button>
-            <button type="button" data-value="2"><span>有，但是不一样！</span></button>
-            <button type="button" data-value="3"><span>……其实有好几个</span></button>
-            <button type="button" data-value="4"><span>别问了</span></button>
-          </div>
-          <p class="reaction" data-reaction="similarOwned"></p>
-        </section>
-
-        <section class="question q-three" data-step="3">
-          <p class="question-kicker">想象一下一个月以后。</p>
-          <label>它最后会活成什么样？</label>
-          <div class="choice-list big-words" data-bind="useFrequency">
-            <button type="button" data-value="0"><span>角落吃灰</span></button>
-            <button type="button" data-value="1"><span>偶尔想起来</span></button>
-            <button type="button" data-value="2"><span>应该挺常用</span></button>
-            <button type="button" data-value="4"><span>真的会高频用</span></button>
-            <button type="button" data-value="5"><span>没它不行</span></button>
-          </div>
-          <p class="reaction" data-reaction="useFrequency"></p>
-        </section>
-
-        <section class="question q-price" data-step="4">
-          <p class="question-kicker">别计算，听钱包的。</p>
-          <label>看到价格时，你的第一声是？</label>
-          <div class="choice-list price-words" data-bind="pricePain">
-            <button type="button" data-value="1"><span>“就这？”</span></button>
-            <button type="button" data-value="2"><span>“还行。”</span></button>
-            <button type="button" data-value="3"><span>“嘶……”</span></button>
-            <button type="button" data-value="4"><span>“等一下。”</span></button>
-            <button type="button" data-value="5"><span>“买完喝西北风。”</span></button>
-          </div>
-          <p class="reaction" data-reaction="pricePain"></p>
-        </section>
-
-        <section class="question q-time" data-step="5">
-          <p class="question-kicker">时间能过滤很多假心动。</p>
-          <label>你惦记它多久了？</label>
-          <div class="choice-list timeline" data-bind="daysThinking">
-            <button type="button" data-value="0"><span>刚刷到</span></button>
-            <button type="button" data-value="1"><span>一两天</span></button>
-            <button type="button" data-value="4"><span>好几天了</span></button>
-            <button type="button" data-value="7"><span>一周左右</span></button>
-            <button type="button" data-value="21"><span>快成执念了</span></button>
-          </div>
-          <p class="reaction" data-reaction="daysThinking"></p>
-        </section>
-
-        <section class="question q-final" data-step="6">
-          <p class="question-kicker">最后一句，别骗自己。</p>
-          <label>它到底是“想要”，还是“需要”？</label>
-          <div class="choice-list final-picks" data-bind="necessity">
-            <button type="button" data-value="1"><span>纯想要</span></button>
-            <button type="button" data-value="2"><span>有点用</span></button>
-            <button type="button" data-value="3"><span>确实有用</span></button>
-            <button type="button" data-value="4"><span>很需要</span></button>
-            <button type="button" data-value="5"><span>真没它不行</span></button>
-          </div>
-          <p class="reaction" data-reaction="necessity"></p>
-        </section>
-
-        <div class="actions">
-          <button class="ghost" id="backBtn" type="button">←</button>
-          <button class="primary" id="nextBtn" type="button">下一句</button>
+      <section class="screen confirm-screen" id="confirmScreen">
+        <button class="back-link" id="confirmBack" type="button">←</button>
+        <p class="section-label">你想买的是</p>
+        <h2 class="product-name" id="confirmProduct">AirPods Max</h2>
+        <div class="product-visual"><span>🎧</span></div>
+        <div class="wallet-note confirm-note">
+          <div class="wallet-face">👛</div>
+          <div><strong>钱包：</strong><p>嗯，又是它。我们聊两句。</p></div>
         </div>
-      </form>
-    </section>
+        <button class="primary" id="confirmBtn" type="button">好，开始</button>
+      </section>
 
-    <section class="phone-card result hidden" id="resultView">
-      <header class="topbar"><span class="brand">先别买</span><span class="step">朋友结论</span></header>
-      <div class="result-body">
-        <div class="result-sheet">
-          <p class="red-note">我替钱包说句话。</p>
-          <div class="stamp" id="decisionStamp">先等等</div>
-          <h2 id="resultTitle">你不是缺这个，<br />你只是很想现在拥有它。</h2>
-          <p class="result-subtitle" id="resultSubtitle"></p>
-          <div class="probability-list">
-            <div><span>买</span><i><em id="barBuy"></em></i><b id="pBuy">0%</b></div>
-            <div class="recommended"><span>等等</span><i><em id="barWait"></em></i><b id="pWait">0%</b></div>
-            <div><span>算了</span><i><em id="barSkip"></em></i><b id="pSkip">0%</b></div>
-          </div>
-          <p class="confidence-line"><strong id="confidenceValue">67%</strong><span>这次我更押这个</span></p>
-          <p class="friend-sign">—— 一个劝你省钱的人</p>
+      <section class="screen quiz-screen" id="quizScreen">
+        <div class="quiz-head">
+          <button class="back-link" id="quizBack" type="button">←</button>
+          <div class="progress-track"><i id="progressBar"></i></div>
+          <span id="progressText">1/6</span>
         </div>
-        <p class="cooldown-text" id="cooldownText">先放三天。三天后还天天来看，再说。</p>
-        <p class="mode-line" id="resultMode">试玩版参考</p>
-        <button class="primary full" id="againBtn" type="button">我不服，再来</button>
-      </div>
+        <p class="product-context">正在看：<strong id="quizProduct">AirPods Max</strong></p>
+
+        <div class="question active" data-step="1">
+          <p class="question-no">先说最直觉的</p>
+          <h2>你现在有多想买它？</h2>
+          <div class="choice-list" data-bind="desire">
+            <button type="button" data-value="1"><span class="choice-emoji">🙂</span><span><strong>其实一般</strong><small>看到也不会一直惦记</small></span></button>
+            <button type="button" data-value="2"><span class="choice-emoji">👀</span><span><strong>有点心动</strong><small>会多看两眼</small></span></button>
+            <button type="button" data-value="3"><span class="choice-emoji">💭</span><span><strong>已经上头</strong><small>最近总在想它</small></span></button>
+            <button type="button" data-value="4"><span class="choice-emoji">🛒</span><span><strong>今晚就想下单</strong><small>购物车已经准备好了</small></span></button>
+            <button type="button" data-value="5"><span class="choice-emoji">🔥</span><span><strong>不买睡不着</strong><small>脑子已经被它占了</small></span></button>
+          </div>
+        </div>
+
+        <div class="question" data-step="2">
+          <p class="question-no">功能差不多的也算</p>
+          <h2>家里已经有替身了吗？</h2>
+          <div class="choice-list" data-bind="similarOwned">
+            <button type="button" data-value="0"><span class="choice-emoji">✨</span><span><strong>没有，真缺</strong><small>手头没有能替代的</small></span></button>
+            <button type="button" data-value="1"><span class="choice-emoji">🤏</span><span><strong>有一点类似</strong><small>但功能不完全一样</small></span></button>
+            <button type="button" data-value="2"><span class="choice-emoji">😶</span><span><strong>有一个差不多的</strong><small>“但是它不一样”</small></span></button>
+            <button type="button" data-value="3"><span class="choice-emoji">🫣</span><span><strong>其实有好几个</strong><small>开始有点重复建设</small></span></button>
+            <button type="button" data-value="4"><span class="choice-emoji">🙈</span><span><strong>别问了</strong><small>家里快能开店了</small></span></button>
+          </div>
+        </div>
+
+        <div class="question" data-step="3">
+          <p class="question-no">想象一个月以后</p>
+          <h2>买回来，你真会用吗？</h2>
+          <div class="choice-list" data-bind="useFrequency">
+            <button type="button" data-value="0"><span class="choice-emoji">📦</span><span><strong>大概率吃灰</strong><small>激情可能只活三天</small></span></button>
+            <button type="button" data-value="1"><span class="choice-emoji">🌙</span><span><strong>偶尔想起来会用</strong><small>使用频率不会太高</small></span></button>
+            <button type="button" data-value="2"><span class="choice-emoji">👌</span><span><strong>应该挺常用</strong><small>已经想到具体场景</small></span></button>
+            <button type="button" data-value="4"><span class="choice-emoji">✅</span><span><strong>真的会高频用</strong><small>每周都会用到</small></span></button>
+            <button type="button" data-value="5"><span class="choice-emoji">💚</span><span><strong>没它不行</strong><small>已经影响日常体验</small></span></button>
+          </div>
+        </div>
+
+        <div class="question" data-step="4">
+          <p class="question-no">别算太细，听钱包的</p>
+          <h2>这个价格，对你疼不疼？</h2>
+          <div class="choice-list" data-bind="pricePain">
+            <button type="button" data-value="1"><span class="choice-emoji">😌</span><span><strong>完全无感</strong><small>不会影响这个月生活</small></span></button>
+            <button type="button" data-value="2"><span class="choice-emoji">🙂</span><span><strong>小意思</strong><small>能承受，但也不是零钱</small></span></button>
+            <button type="button" data-value="3"><span class="choice-emoji">😬</span><span><strong>有点肉疼</strong><small>付款时会犹豫一下</small></span></button>
+            <button type="button" data-value="4"><span class="choice-emoji">😵</span><span><strong>得认真想想</strong><small>会明显影响预算</small></span></button>
+            <button type="button" data-value="5"><span class="choice-emoji">🥲</span><span><strong>买完要吃土</strong><small>这个月会很难受</small></span></button>
+          </div>
+        </div>
+
+        <div class="question" data-step="5">
+          <p class="question-no">时间能过滤假心动</p>
+          <h2>你惦记它多久了？</h2>
+          <div class="choice-list" data-bind="daysThinking">
+            <button type="button" data-value="0"><span class="choice-emoji">⚡</span><span><strong>刚刷到</strong><small>今天才第一次认真看</small></span></button>
+            <button type="button" data-value="1"><span class="choice-emoji">🌤️</span><span><strong>一两天</strong><small>热度还很新鲜</small></span></button>
+            <button type="button" data-value="4"><span class="choice-emoji">📅</span><span><strong>好几天了</strong><small>不是一闪而过</small></span></button>
+            <button type="button" data-value="7"><span class="choice-emoji">🗓️</span><span><strong>一周左右</strong><small>确实惦记挺久了</small></span></button>
+            <button type="button" data-value="21"><span class="choice-emoji">🧠</span><span><strong>快成执念了</strong><small>很久都没忘掉</small></span></button>
+          </div>
+        </div>
+
+        <div class="question" data-step="6">
+          <p class="question-no">最后一句，别骗自己</p>
+          <h2>它到底是“想要”，还是“需要”？</h2>
+          <div class="choice-list" data-bind="necessity">
+            <button type="button" data-value="1"><span class="choice-emoji">💅</span><span><strong>纯想要</strong><small>没有它也完全没事</small></span></button>
+            <button type="button" data-value="2"><span class="choice-emoji">🤔</span><span><strong>有点用</strong><small>能改善一点体验</small></span></button>
+            <button type="button" data-value="3"><span class="choice-emoji">👍</span><span><strong>确实有用</strong><small>有明确需求</small></span></button>
+            <button type="button" data-value="4"><span class="choice-emoji">🧩</span><span><strong>很需要</strong><small>能解决真实问题</small></span></button>
+            <button type="button" data-value="5"><span class="choice-emoji">🛟</span><span><strong>真没它不行</strong><small>已经接近刚需</small></span></button>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen analysis-screen" id="analysisScreen">
+        <p class="section-label">我看看……</p>
+        <h2>把你的理由捋一遍。</h2>
+        <div class="wallet-thinking">👛<span class="thinking-dots">•••</span></div>
+        <div class="analysis-list">
+          <p><i>✓</i> 判断现在有多上头</p>
+          <p><i>✓</i> 看看是不是真需求</p>
+          <p><i>✓</i> 对比预算和使用频率</p>
+          <p><i>✓</i> 给一个不拐弯的结论</p>
+        </div>
+        <small>不会太久。</small>
+      </section>
+
+      <section class="screen result-screen" id="resultScreen">
+        <div class="result-top">
+          <div><p class="section-label">我的判断</p><h2 id="decisionStamp">先等等</h2></div>
+          <span class="score-pill" id="confidenceValue">68%</span>
+        </div>
+        <p class="result-product" id="resultProduct">AirPods Max</p>
+        <p class="result-subtitle" id="resultSubtitle">你喜欢它是真的，但现在更像冲动，不像需求。</p>
+
+        <div class="wallet-verdict">
+          <div class="wallet-face">👛</div>
+          <div><strong>钱包说：</strong><p id="walletQuote">“你不是需要它，你只是最近刷到它太多次了。”</p></div>
+        </div>
+
+        <div class="probability-card">
+          <p class="card-title">各选项概率</p>
+          <div class="prob-row"><span>现在买</span><i><em id="barBuy"></em></i><b id="pBuy">0%</b></div>
+          <div class="prob-row"><span>先等等</span><i><em id="barWait"></em></i><b id="pWait">0%</b></div>
+          <div class="prob-row"><span>算了吧</span><i><em id="barSkip"></em></i><b id="pSkip">0%</b></div>
+        </div>
+
+        <div class="advice-card"><span>💡</span><div><strong>我的建议</strong><p id="cooldownText">先放购物车 3 天。三天后还想买，再回来。</p></div></div>
+        <p class="mode-line" id="resultMode"></p>
+        <button class="primary" id="againBtn" type="button">测另一个东西</button>
+      </section>
     </section>
   </main>
   <script src="app.js"></script>
