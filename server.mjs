@@ -21,25 +21,27 @@ function json(res, status, body) {
 }
 
 function demoDecision(state) {
-  const pricePressure = Math.min(1, state.price / Math.max(1, state.monthlyBudget));
+  const desire = Math.min(1, Math.max(0, (state.desire - 1) / 4));
   const duplicatePenalty = Math.min(1, state.similarOwned / 4);
-  const desire = state.desire / 10;
-  const frequency = state.useFrequency / 5;
-  const urgency = state.necessity / 10;
-  const considered = Math.min(1, state.daysThinking / 14);
+  const frequency = Math.min(1, state.useFrequency / 5);
+  const pricePain = Math.min(1, Math.max(0, (state.pricePain - 1) / 4));
+  const urgency = Math.min(1, Math.max(0, (state.necessity - 1) / 4));
+  const considered = Math.min(1, state.daysThinking / 21);
 
-  let buy = 0.18 + desire * 0.24 + frequency * 0.19 + urgency * 0.21 + considered * 0.08;
-  buy -= pricePressure * 0.24 + duplicatePenalty * 0.18;
+  let buy = 0.16 + desire * 0.24 + frequency * 0.19 + urgency * 0.22 + considered * 0.10;
+  buy -= pricePain * 0.24 + duplicatePenalty * 0.18;
 
-  let skip = 0.12 + pricePressure * 0.20 + duplicatePenalty * 0.22 + (1 - desire) * 0.20;
-  skip += (1 - frequency) * 0.10 + (1 - urgency) * 0.08;
+  let skip = 0.10 + pricePain * 0.22 + duplicatePenalty * 0.22 + (1 - desire) * 0.19;
+  skip += (1 - frequency) * 0.11 + (1 - urgency) * 0.10;
 
-  let wait = 0.32 + (1 - considered) * 0.18 + Math.abs(0.5 - desire) * 0.06;
-  wait += pricePressure > 0.45 ? 0.08 : 0;
+  let wait = 0.30 + (1 - considered) * 0.20;
+  wait += desire >= 0.5 && pricePain >= 0.5 ? 0.10 : 0;
+  wait += urgency >= 0.5 && considered < 0.35 ? 0.05 : 0;
 
   buy = Math.max(0.03, buy);
   wait = Math.max(0.03, wait);
   skip = Math.max(0.03, skip);
+
   const total = buy + wait + skip;
   const probabilities = {
     BUY: buy / total,
@@ -59,11 +61,11 @@ async function decideWithJev(state) {
     state,
     questions: {
       decision: choice(
-        'Given this shopper context, which action is most sensible right now? Choose based on affordability, real need, likely usage, duplicate ownership, impulse risk, and how long the user has already considered the purchase.',
+        'Given this shopper context, which action is most sensible right now? Decide from how strongly they want it, whether they already own substitutes, realistic usage, how painful the price feels, how long they have considered it, and whether it is truly needed.',
         {
-          BUY: 'Buy now. The item is affordable enough, meaningfully wanted or needed, and likely to be used enough to justify the purchase.',
-          WAIT: 'Do not buy today. The user may still want it, but a cooling-off period or more information would improve the decision.',
-          SKIP: 'Skip this purchase. It is low-value, redundant, weakly needed, unlikely to be used, or financially uncomfortable.'
+          BUY: 'Buy now. The desire and real utility are strong, the item is not redundant, and the financial discomfort is acceptable.',
+          WAIT: 'Do not buy today. The desire may be real, but more cooling-off time would improve the decision.',
+          SKIP: 'Skip this purchase. It is redundant, weakly needed, unlikely to be used, or financially uncomfortable.'
         }
       )
     }
@@ -82,25 +84,34 @@ async function decideWithJev(state) {
 
 function buildCopy(result, state) {
   const pct = Math.round(result.confidence * 100);
-  const priceRatio = state.price / Math.max(1, state.monthlyBudget);
+
   if (result.decision === 'BUY') {
-    const reason = state.useFrequency >= 3
-      ? '你是真的会用，不只是想拥有。'
-      : '目前条件支持购买，但别为了“便宜”制造需求。';
-    return { title: '可以买。', subtitle: reason, cooldown: '今天下单也不算冲动', pct };
+    const reason = state.useFrequency >= 4 && state.necessity >= 4
+      ? '不是纯上头，你是真的会用，而且确实需要。'
+      : state.pricePain <= 2
+        ? '喜欢、会用，钱包也扛得住，这次理由比较完整。'
+        : '条件基本支持购买，但付款前还是看一眼自己的真实预算。';
+    return { title: '可以买。', subtitle: reason, cooldown: '今天下单，也不太像冲动消费', pct };
   }
+
   if (result.decision === 'SKIP') {
-    const reason = state.similarOwned >= 2
-      ? '你已经有相似替代品，这次更像重复拥有。'
-      : priceRatio > 0.6
-        ? '它正在明显挤压你的可用预算。'
-        : '想要感不够强，使用场景也不够明确。';
-    return { title: '这次先别买。', subtitle: reason, cooldown: '把钱留给更确定的喜欢', pct };
+    const reason = state.similarOwned >= 3
+      ? '家里已经有不少替代品，这次更像重复拥有。'
+      : state.pricePain >= 4
+        ? '喜欢是真的，但这个价格已经让钱包明显不舒服了。'
+        : state.useFrequency <= 1
+          ? '你更喜欢“拥有它”的感觉，不一定真的会用它。'
+          : '这次购买理由还不够强，把钱留给更确定的喜欢。';
+    return { title: '这次先别买。', subtitle: reason, cooldown: '先放回收藏夹，别放进购物车', pct };
   }
-  const days = state.price > state.monthlyBudget * 0.4 ? 7 : 3;
+
+  const days = state.pricePain >= 4 || state.daysThinking <= 1 ? 7 : 3;
+  const subtitle = state.desire >= 4
+    ? '你是真的很上头，但上头的时候最适合晚点付款。'
+    : '不是不能买，是现在还不够确定。';
   return {
     title: '等等再买。',
-    subtitle: '不是不能买，是现在还不够确定。',
+    subtitle,
     cooldown: `${days} 天后还想要，再回来问一次`,
     pct
   };
