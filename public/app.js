@@ -7,7 +7,7 @@ const reactions={
   daysThinking:{0:'刚刷到就想买，危险。',1:'热度还很新。',4:'几天后还惦记，算认真。',7:'一周了，确实不是闪念。',21:'这么久没忘，有点东西。'},
   necessity:{1:'想要没错，别冒充需要。',2:'有点用，但没到非买不可。',3:'理由开始站得住了。',4:'这已经比较像真实需求。',5:'行，那重点只剩预算。'}
 };
-const progressCopy=['还没开始','我听着呢','有点不对劲了','嗯，我大概懂了','再问两句','差不多了','最后一个问题'];
+const progressCopy=['还没开始','我听着呢','有点不对劲了','嗯，我大概懂了','差不多了','最后两句','最后一个问题'];
 const stampCopy={BUY:'可以买',WAIT:'先等等',SKIP:'算了吧'};
 const resultCopy={
   BUY:{title:'行，这次真不是乱买。',subtitle:'你会用，预算也扛得住。可以买，但别顺手再加购。',action:'行，我知道了'},
@@ -15,6 +15,7 @@ const resultCopy={
   SKIP:{title:'你不是缺这个，\n你只是缺一个下单理由。',subtitle:'替代品、使用频率和钱包已经一起投了反对票。',action:'好，我先关掉'}
 };
 let step=1;
+let moving=false;
 const total=6;
 const $=s=>document.querySelector(s);
 
@@ -22,21 +23,6 @@ function syncReaction(key,value){
   const el=document.querySelector(`[data-reaction="${key}"]`);
   if(el&&reactions[key]?.[value]!=null) el.textContent=reactions[key][value];
 }
-
-document.querySelectorAll('[data-bind]').forEach(group=>{
-  const key=group.dataset.bind;
-  group.querySelectorAll('button').forEach(btn=>{
-    const value=Number(btn.dataset.value);
-    if(value===state[key]) btn.classList.add('selected');
-    btn.onclick=()=>{
-      state[key]=value;
-      group.querySelectorAll('button').forEach(b=>b.classList.remove('selected'));
-      btn.classList.add('selected');
-      syncReaction(key,value);
-    };
-  });
-  syncReaction(key,state[key]);
-});
 
 function updateStep(){
   document.querySelectorAll('.question').forEach(q=>{
@@ -46,8 +32,51 @@ function updateStep(){
   });
   $('#stepLabel').textContent=progressCopy[step];
   $('#backBtn').disabled=step===1;
-  $('#nextBtn').textContent=step===total?'给个结论':'下一句';
 }
+
+async function finishDecision(){
+  if(moving) return;
+  moving=true;
+  $('#stepLabel').textContent='我想一下…';
+  try{
+    const res=await fetch('/api/decide',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(state)});
+    if(!res.ok) throw new Error('决策失败');
+    showResult(await res.json());
+  }catch(e){
+    alert(e.message);
+    $('#stepLabel').textContent=progressCopy[step];
+  }finally{
+    moving=false;
+  }
+}
+
+document.querySelectorAll('[data-bind]').forEach(group=>{
+  const key=group.dataset.bind;
+  group.querySelectorAll('button').forEach(btn=>{
+    const value=Number(btn.dataset.value);
+    if(value===state[key]) btn.classList.add('selected');
+    btn.onclick=()=>{
+      if(moving) return;
+      state[key]=value;
+      group.querySelectorAll('button').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      syncReaction(key,value);
+
+      moving=true;
+      window.setTimeout(()=>{
+        if(step<total){
+          step++;
+          moving=false;
+          updateStep();
+        }else{
+          moving=false;
+          finishDecision();
+        }
+      },110);
+    };
+  });
+  syncReaction(key,state[key]);
+});
 
 $('#startBtn').onclick=()=>{
   $('#startScreen').classList.add('hidden');
@@ -55,20 +84,16 @@ $('#startBtn').onclick=()=>{
   updateStep();
 };
 
-$('#backBtn').onclick=()=>{if(step>1){step--;updateStep();}};
+$('#backBtn').onclick=()=>{
+  if(moving||step<=1) return;
+  step--;
+  updateStep();
+};
 
-$('#nextBtn').onclick=async()=>{
-  if(step<total){step++;updateStep();return;}
-  $('#nextBtn').disabled=true;
-  $('#nextBtn').textContent='我想一下…';
-  try{
-    const res=await fetch('/api/decide',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(state)});
-    if(!res.ok) throw new Error('决策失败');
-    showResult(await res.json());
-  }catch(e){alert(e.message);}finally{
-    $('#nextBtn').disabled=false;
-    $('#nextBtn').textContent='给个结论';
-  }
+// 保留旧按钮节点，避免旧 HTML 报错；V3 中不再需要“下一步”。
+if($('#nextBtn')) $('#nextBtn').onclick=()=>{
+  if(step<total){step++;updateStep();}
+  else finishDecision();
 };
 
 function showResult(data){
@@ -104,6 +129,7 @@ $('#againBtn').onclick=()=>{
   $('#decisionForm').classList.add('hidden');
   $('#stepLabel').textContent='把手机给我';
   step=1;
+  moving=false;
 };
 
 if(new URLSearchParams(location.search).get('preview')==='result'){
