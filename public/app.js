@@ -52,6 +52,12 @@ const reactions = {
   },
 };
 
+const stampCopy = {
+  BUY: '可以买',
+  WAIT: '先等等',
+  SKIP: '算了吧',
+};
+
 let step = 1;
 const total = 6;
 const $ = (s) => document.querySelector(s);
@@ -77,7 +83,10 @@ document.querySelectorAll('[data-bind]').forEach(group => {
 });
 
 function updateStep() {
-  document.querySelectorAll('.question').forEach(q => q.classList.toggle('active', Number(q.dataset.step) === step));
+  document.querySelectorAll('.question').forEach(q => {
+    q.classList.toggle('active', Number(q.dataset.step) === step);
+    if (Number(q.dataset.step) === step) q.scrollTop = 0;
+  });
   $('#stepLabel').textContent = `${step} / ${total}`;
   $('#progressBar').style.width = `${(step / total) * 100}%`;
   $('#backBtn').disabled = step === 1;
@@ -121,12 +130,12 @@ function showResult(data) {
   const result = $('#resultView');
   result.classList.remove('hidden', 'buy', 'wait', 'skip');
   result.classList.add(data.decision.toLowerCase());
-  $('#decisionStamp').textContent = data.decision;
+  $('#decisionStamp').textContent = stampCopy[data.decision] || data.decision;
   $('#resultTitle').textContent = data.copy.title;
   $('#resultSubtitle').textContent = data.copy.subtitle;
   $('#cooldownText').textContent = data.copy.cooldown;
   $('#confidenceValue').textContent = `${data.copy.pct}%`;
-  $('#resultMode').textContent = data.mode === 'jev' ? `JEV · ${data.model || 'SYSTEM ONE'}` : 'DEMO DECISION · JEV READY';
+  $('#resultMode').textContent = data.mode === 'jev' ? 'AI 给的参考' : '试玩版参考';
 
   const probs = data.probabilities || {};
   for (const key of ['Buy', 'Wait', 'Skip']) {
@@ -135,8 +144,7 @@ function showResult(data) {
     $(`#bar${key}`).style.width = `${value}%`;
   }
 
-  const ring = $('.confidence-ring');
-  ring.style.background = `conic-gradient(var(--red) 0 ${data.copy.pct}%, var(--soft) ${data.copy.pct}% 100%)`;
+  result.scrollTop = 0;
 }
 
 $('#againBtn').onclick = () => {
@@ -155,7 +163,7 @@ if (new URLSearchParams(location.search).get('preview') === 'result') {
     confidence: 0.51,
     mode: 'demo',
     copy: {
-      title: '等等再买。',
+      title: '很上头，但先忍三天。',
       subtitle: '你是真的心动，但钱包和理智还想再聊两句。',
       cooldown: '3 天后还想要，再回来问一次',
       pct: 51,
