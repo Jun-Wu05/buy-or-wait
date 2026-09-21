@@ -1,0 +1,17 @@
+{
+  "name": "buy-or-wait",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A one-day MVP that helps users decide BUY / WAIT / SKIP with Jev.",
+  "scripts": {
+    "dev": "node server.mjs",
+    "start": "node server.mjs"
+  },
+  "dependencies": {
+    "@typesafe-ai/sdk": "^0.6.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
