@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f7f1e8" />
+  <title>买不买 · Buy or Wait</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <section class="phone-card" id="questionView">
+      <header class="topbar">
+        <div class="brand-dot"></div>
+        <span>买不买</span>
+        <span class="step" id="stepLabel">1 / 6</span>
+      </header>
+
+      <div class="hero-copy">
+        <p class="eyebrow">BEFORE YOU CHECK OUT</p>
+        <h1>被种草了？<br />先别急着付款。</h1>
+        <p class="intro">回答 6 个问题，让 AI 帮你做一次冷静决策。</p>
+      </div>
+
+      <div class="progress"><span id="progressBar"></span></div>
+
+      <form id="decisionForm">
+        <section class="question active" data-step="1">
+          <label>这件东西多少钱？</label>
+          <div class="money-input"><span>¥</span><input id="price" type="number" min="0" value="899" /></div>
+          <p class="hint">填你实际需要支付的价格</p>
+        </section>
+
+        <section class="question" data-step="2">
+          <label>这个月还能自由花多少钱？</label>
+          <div class="money-input"><span>¥</span><input id="monthlyBudget" type="number" min="1" value="1800" /></div>
+          <p class="hint">扣掉房租、饭钱、固定支出之后</p>
+        </section>
+
+        <section class="question" data-step="3">
+          <label>你到底有多想要它？</label>
+          <div class="scale-row" id="desireScale"></div>
+          <p class="hint">1 = 无所谓，10 = 想很久了</p>
+        </section>
+
+        <section class="question" data-step="4">
+          <label>家里已经有几个类似的？</label>
+          <div class="choice-grid" data-bind="similarOwned">
+            <button type="button" data-value="0">0</button><button type="button" data-value="1">1</button>
+            <button type="button" data-value="2">2</button><button type="button" data-value="3">3+</button>
+          </div>
+          <p class="hint">“功能差不多”也算类似</p>
+        </section>
+
+        <section class="question" data-step="5">
+          <label>你觉得每周会用几次？</label>
+          <div class="choice-grid wide" data-bind="useFrequency">
+            <button type="button" data-value="0">几乎不用</button><button type="button" data-value="1">1 次</button>
+            <button type="button" data-value="3">2–3 次</button><button type="button" data-value="5">4+ 次</button>
+          </div>
+          <p class="hint">按真实生活，不按理想中的自己</p>
+        </section>
+
+        <section class="question" data-step="6">
+          <label>你已经想买它多久了？</label>
+          <div class="choice-grid wide" data-bind="daysThinking">
+            <button type="button" data-value="0">刚刷到</button><button type="button" data-value="1">1 天</button>
+            <button type="button" data-value="3">3 天</button><button type="button" data-value="14">2 周+</button>
+          </div>
+          <div class="necessity-wrap">
+            <span>它有多“需要”？</span><input id="necessity" type="range" min="1" max="10" value="5" />
+            <b id="necessityValue">5</b>
+          </div>
+        </section>
+
+        <div class="actions">
+          <button class="ghost" id="backBtn" type="button" disabled>上一步</button>
+          <button class="primary" id="nextBtn" type="button">继续</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="phone-card result hidden" id="resultView">
+      <header class="topbar">
+        <div class="brand-dot"></div><span>买不买</span><span class="step">AI DECISION</span>
+      </header>
+      <div class="result-body">
+        <p class="eyebrow" id="resultMode">DECISION</p>
+        <div class="stamp" id="decisionStamp">WAIT</div>
+        <h2 id="resultTitle">等等再买。</h2>
+        <p class="result-subtitle" id="resultSubtitle">不是不能买，是现在还不够确定。</p>
+
+        <div class="confidence-ring"><div><strong id="confidenceValue">67%</strong><span>置信度</span></div></div>
+
+        <div class="probability-list">
+          <div><span>BUY</span><i><em id="barBuy"></em></i><b id="pBuy">0%</b></div>
+          <div><span>WAIT</span><i><em id="barWait"></em></i><b id="pWait">0%</b></div>
+          <div><span>SKIP</span><i><em id="barSkip"></em></i><b id="pSkip">0%</b></div>
+        </div>
+
+        <div class="cooldown-card">
+          <span>冷静期</span>
+          <strong id="cooldownText">3 天后还想要，再回来问一次</strong>
+        </div>
+
+        <p class="disclaimer">这是一个消费决策辅助工具，不替代你的预算判断。</p>
+        <button class="primary full" id="againBtn" type="button">再测一件</button>
+      </div>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
